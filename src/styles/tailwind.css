@@ -1,0 +1,33 @@
+@tailwind utilities;
+
+.Button {
+    @apply outline-none leading-normal border-solid border bg-transparent m-xxs rounded-md shadow-none p-sm;
+
+    &.-dark {
+        @apply border-primary text-primary;
+    }
+
+    &.-dark.-active {
+        @apply bg-primary text-white;
+    }
+
+    &.-light {
+        @apply border-white text-white;
+    }
+
+    &.-light.-active {
+        @apply bg-white text-primary;
+    }
+}
+
+.OptionSection {
+    @apply rounded-small p-sm text-center;
+
+    & + .OptionSection {
+        @apply mt-sm;
+    }
+
+    > h2 {
+        @apply m-none;
+    }
+}
