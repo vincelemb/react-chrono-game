@@ -3,6 +3,7 @@ import AudioButton from './AudioButton';
 import BgImage from './BgImage';
 import Button from './Button';
 import Container from './Container';
+import CircleGrow from './CircleGrow';
 import HeartBeat from './HeartBeat';
 import Layout from './Layout';
 import Modal from './Modal';
@@ -17,6 +18,7 @@ export {
     BgImage,
     Button,
     Container,
+    CircleGrow,
     HeartBeat,
     Layout,
     Modal,

@@ -1,106 +1,117 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Path } from './config';
 import {
+    Audio,
+    PlayerControls,
+    CircleGrow,
     Container,
     BgImage,
     Modal,
-    HeartBeat,
-    PlayerControls,
-    Audio,
     TabsGroup,
     OrderedList,
 } from './components';
-import { useCountdownOverlay, useCountdown, useAudioPlayer } from './logics';
-import { CountdownContext } from './context';
 import { InfoSvg } from './components/svg';
-import { Path } from './config';
+import chronoType from './type/chronoType';
+import './styles/index.scss';
+import {
+    useCountdownOverlay,
+    useAudioPlayer,
+    useScoreTimer,
+} from './logics';
+import {
+    CountdownContext,
+    TimerContext,
+} from './context';
 
 const Main = () => {
     const [timeActive, setTimeActive] = useState<boolean>(false);
     const [isModal, setIsModal] = useState<boolean>(false);
 
-    const [stepCardio, setStepCardio] = useState<string>('Inspirez');
+    const chronoStep: chronoType = {
+        stepSeconds: [40, 70, 80],
+        stepName: ['Inspirez', 'Retenez', 'Expirez'],
+        stepColor: ['primary', 'warning', 'golden'],
+    };
 
-    const { setAudioPlaying, musicPlaying, setMusicPlaying, setResetMusic } = useAudioPlayer();
+    let [step, setStep] = useState<number>(0);
+
+    const { seconds } = useScoreTimer(timeActive, 100);
+    const { setSeconds } = useContext(TimerContext);
+
+    const { musicPlaying, setMusicPlaying, setResetMusic } = useAudioPlayer();
 
     const { countdownOverlaySeconds } = useCountdownOverlay(isModal);
-    const { countdownSeconds } = useCountdown(timeActive);
+    const { setCountdownOverlaySeconds } = useContext(CountdownContext);
 
-    const { setCountdownSeconds, setCountdownOverlaySeconds } = useContext(CountdownContext);
+    // CHRONO
+    const [changeDataCountdown, setChangeDataCountdown] = useState<boolean>(
+        false
+    );
 
-    const [changeDataCountdown, setChangeDataCountdown] = useState<boolean>(false);
-
-    const [firstBip, setFirstBip] = useState<number>(0);
-    const [stepAnimation, setStepAnimation] = useState<number>(1);
-    const [timeNumber, setTimeNumber] = useState<number>(5);
     const [play, setPlay] = useState<any>(null);
     const [animationState, setAnimationState] = useState<string>('paused');
 
     useEffect(() => {
-        if (play === null) {
-            setCountdownSeconds(timeNumber * 600);
+        // console.log(typeof seconds);
+        // console.log(typeof chronoStep.stepSeconds[0]);
+        if (timeActive === true) {
+            if (seconds > chronoStep.stepSeconds[step]) {
+                setStep(step + 1);
+                setSeconds(1);
+            }
+            if (step === 2 && seconds > chronoStep.stepSeconds[step]) {
+                setStep(0);
+                setSeconds(1);
+            }
+        } else {
+            setSeconds(1);
         }
+    }, [seconds]);
+
+    useEffect(() => {
         if (play === true) {
             setIsModal(true);
             if (isModal && countdownOverlaySeconds === 0) {
                 setAnimationState('running');
-                setChangeDataCountdown(true);
                 setIsModal(false);
-                setTimeActive(true);
+                setChangeDataCountdown(true);
+                setTimeActive(!timeActive);
             }
-        } else {
-            setAnimationState('paused');
-            setTimeActive(false);
         }
-    }, [play, timeNumber, countdownOverlaySeconds]);
+    }, [play, countdownOverlaySeconds]);
 
     useEffect(() => {
-        setAudioPlaying(false);
-        if (play === true) {
-            if (firstBip === 0) {
-                setAudioPlaying(true);
-                setFirstBip(1);
-            }
-            if ((countdownSeconds / 10) % 10 === 5) {
-                setAudioPlaying(true);
-                setStepAnimation(2);
-                setStepCardio('Expirez');
-            } else if ((countdownSeconds / 10) % 10 === 0) {
-                setAudioPlaying(true);
-                setStepAnimation(1);
-                setStepCardio('Inspirez');
-            }
-
-            if (countdownSeconds === 0) {
-                reset();
-            }
+        if (play === false) {
+            setAnimationState('paused');
+            setTimeActive(!timeActive);
         }
-    }, [countdownSeconds]);
+    }, [play]);
 
-    function secondsToTime(seconds) {
-        return new Date(seconds * 100).toISOString().substr(14, 5);
+    function displayCount(count) {
+        let res = count / 10;
+        return Math.ceil(res);
     }
 
     function reset() {
-        setFirstBip(0);
         setPlay(null);
-        setStepAnimation(1);
-        setAnimationState('paused');
+        setStep(0);
+        setSeconds(1);
         setTimeActive(false);
+        setAnimationState('paused');
         setResetMusic(true);
         setMusicPlaying(false);
-        setAudioPlaying(false);
         setChangeDataCountdown(false);
     }
 
     return (
         <BgImage imageUrl={`${Path.imgPath}hero.jpg`}>
             <Container maxWidth="991px" isCenteredX>
-                <main className="_p-sm">
+                <div className="_px-sm">
                     <TabsGroup
                         noTabsonDesktop={true}
                         contents={[
                             {
-                                title: 'Options',
+                                title: 'Option',
                                 subcontent: (
                                     <aside className="_my-md">
                                         <TabsGroup
@@ -109,29 +120,46 @@ const Main = () => {
                                             contents={[
                                                 {
                                                     title: 'étapes',
-                                                    subcontent: (
-                                                        <OrderedList
-                                                            lists={[
-                                                                {
-                                                                    content: `Faites l'exercice 3 fois par jour, de préférence assis, les yeux ouverts ou fermés, le dos bien droit et les pieds posés à plat au sol.`,
-                                                                },
-                                                                {
-                                                                    content: `Respirez 6 fois par minute : inspirez en comptant jusqu'à 5, puis expirez en comptant jusqu'à 5. Le signal sonore vous aide à vous repérer.`,
-                                                                },
-                                                                {
-                                                                    content: `Idéalement, pratiquez cet exercice pendant 5 minutes`,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    ),
+                                                    subcontent: [
+                                                        {
+                                                            content: (
+                                                                <OrderedList
+                                                                    lists={[
+                                                                        {
+                                                                            color:
+                                                                                chronoStep.stepColor &&
+                                                                                chronoStep
+                                                                                    .stepColor[0],
+                                                                            content: `Fermez la bouche et inspirez tranquillement par le nez en comptant jusqu'à 4.`,
+                                                                        },
+                                                                        {
+                                                                            color:
+                                                                                chronoStep.stepColor &&
+                                                                                chronoStep
+                                                                                    .stepColor[1],
+                                                                            content: `Retenez votre souffle en comptant jusqu'à 7.`,
+                                                                        },
+                                                                        {
+                                                                            color:
+                                                                                chronoStep.stepColor &&
+                                                                                chronoStep
+                                                                                    .stepColor[2],
+                                                                            content: `Expirez bruyamment par la bouche en comptant jusqu'à 8 et en faisant le son "whoosh".`,
+                                                                        },
+                                                                    ]}
+                                                                />
+                                                            ),
+                                                        },
+                                                        {
+                                                            title:
+                                                                'Avant de commencer',
+                                                            content: `Fermez les yeux et expirez tout l'air de vos poumons. Touchez votre palais du bout de la langue, juste derrière les incisives, et conservez cette position pendant l'exercice`,
+                                                        },
+                                                    ],
                                                 },
                                                 {
                                                     title: 'le saviez-vous ?',
-                                                    subcontent: `Cette technique de relaxation se base sur des exercices de respiration pour
-                                                        atteindre un état d'équilibre du système nerveux autonome (notre "pilote
-                                                        automatique"). En agissant sur la variabilité du rythme cardiaque, il est possible
-                                                        de gérer son état émotionnel et d’améliorer son bien-être physique et psychique :
-                                                        moins de stress, meilleur sommeil, meilleure concentration…`,
+                                                    subcontent: `Cet exercice permet de diminuer le stress, et peut également vous aider à vous endormir. Idéalement, mettez-vous assis le dos bien droit, les pieds à plat au sol. Vous pouvez également pratiquer cet exercice debout, ou couché dans votre lit.`,
                                                 },
                                             ]}
                                         />
@@ -141,7 +169,7 @@ const Main = () => {
                             {
                                 title: 'Jouer',
                                 subcontent: (
-                                    <section className={`_items-center _relative _my-xl`}>
+                                    <section>
                                         <Modal
                                             title="Partie terminée"
                                             isModal={isModal}
@@ -150,14 +178,19 @@ const Main = () => {
                                                 setCountdownOverlaySeconds(0);
                                             }}>
                                             <span className="_text-white">
-                                                {changeDataCountdown === false ? 'Début dans :' : 'Reprise dans :'}
+                                                {changeDataCountdown === false
+                                                    ? 'Début dans :'
+                                                    : 'Reprise dans :'}
                                             </span>
                                             <span className="_text-xxl _text-white _py-sm">
                                                 {countdownOverlaySeconds}
                                             </span>
                                             <div
                                                 className="_w-4/5 _bg-white _rounded-small _border-solid _border-2 _p-sm _border-white _flex"
-                                                style={{ backgroundColor: 'rgba(255,255,255,.3)' }}>
+                                                style={{
+                                                    backgroundColor:
+                                                        'rgba(255,255,255,.3)',
+                                                }}>
                                                 <div className="_mr-xs">
                                                     <InfoSvg
                                                         fillColor="#fff"
@@ -165,11 +198,11 @@ const Main = () => {
                                                         svgHeight="20px"></InfoSvg>
                                                 </div>
                                                 <span className="_text-white">
-                                                    Essayez de respirer par le ventre pendant cet exercice
+                                                    Essayez de respirer par le
+                                                    ventre pendant cet exercice
                                                 </span>
                                             </div>
                                         </Modal>
-
                                         <section className="_w-full _flex _justify-center _items-center">
                                             <div className="_flex _flex-col">
                                                 {play !== null && (
@@ -177,79 +210,74 @@ const Main = () => {
                                                         className="_text-center _text-xl _text-white _w-full"
                                                         role="status"
                                                         aria-live="polite">
-                                                        {stepCardio}
+                                                        {
+                                                            chronoStep.stepName[
+                                                                step
+                                                            ]
+                                                        }
                                                     </span>
                                                 )}
-                                                <div className="c-cardio-player _relative _flex _justify-center _items-center">
-                                                    <HeartBeat
-                                                        playingStep={stepAnimation}
+                                                <div className="c-chrono-player _relative _flex _justify-center _items-center">
+                                                    <CircleGrow
                                                         isPlaying={play}
-                                                        playingState={animationState}></HeartBeat>
-                                                    {play !== null && (
-                                                        <span className="_text-center _text-xxl _text-white _z-10">{`${secondsToTime(
-                                                            countdownSeconds
-                                                        )}`}</span>
-                                                    )}
+                                                        playingStep={step}
+                                                        borderColor={
+                                                            chronoStep
+                                                                .stepColor[step]
+                                                        }
+                                                        playingState={
+                                                            animationState
+                                                        }></CircleGrow>
                                                     {play === null && (
-                                                        <div className="_w-3/5 _flex _justify-between _items-center">
-                                                            <div className="_relative">
-                                                                <button
-                                                                    className="_relative _z-10 _rounded-rounded _bg-black _min-w-xxl _min-h-xxl _max-h-xxl _opacity-10"
-                                                                    onClick={() =>
-                                                                        timeNumber > 1
-                                                                            ? setTimeNumber(timeNumber - 1)
-                                                                            : null
-                                                                    }></button>
-                                                                <div className="less"></div>
-                                                            </div>
-                                                            <div className="_flex _flex-col _items-center">
-                                                                <span
-                                                                    className="_text-xxl _text-white  _text-center _z-10"
-                                                                    role="status"
-                                                                    aria-live="polite">
-                                                                    {timeNumber}
-                                                                </span>
-                                                                <span className="_text-white _z-10">min</span>
-                                                            </div>
-                                                            <div className="_relative">
-                                                                <button
-                                                                    className=" _relative _z-10 _rounded-rounded _bg-black _min-w-xxl _min-h-xxl _max-h-xxl _opacity-10"
-                                                                    onClick={() =>
-                                                                        timeNumber < 10
-                                                                            ? setTimeNumber(timeNumber + 1)
-                                                                            : null
-                                                                    }></button>
-                                                                <div className="more"></div>
-                                                            </div>
-                                                        </div>
+                                                        <span
+                                                            className="_text-lg _text-primary _p-xs _text-center _z-10"
+                                                            role="status"
+                                                            aria-live="polite">
+                                                            Cliquez sur lecture
+                                                            pour commencer
+                                                        </span>
+                                                    )}
+                                                    {play !== null && (
+                                                        <span className="_text-center _text-xxl _text-primary _z-10">
+                                                            {displayCount(
+                                                                seconds
+                                                            )}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
                                         </section>
-
                                         <PlayerControls
                                             play={play}
                                             isPlaying={musicPlaying}
-                                            audioFile={'Wind.mp3'}
+                                            audioFile={'Soul-Colors.mp3'}
                                             onClick={{
                                                 reset: () => reset(),
                                                 pause: () => {
-                                                    setCountdownOverlaySeconds(changeDataCountdown ? 3 : 5);
+                                                    setCountdownOverlaySeconds(
+                                                        changeDataCountdown
+                                                            ? 3
+                                                            : 5
+                                                    );
                                                     setPlay(!play);
                                                 },
                                                 audio: () => {
                                                     setResetMusic(false);
-                                                    setMusicPlaying(!musicPlaying);
+                                                    setMusicPlaying(
+                                                        !musicPlaying
+                                                    );
                                                 },
                                             }}
                                         />
-                                        <Audio id="audio" audioFile={'bip.mp3'}></Audio>
+                                        <Audio
+                                            id="audio"
+                                            audioFile={'bip.mp3'}></Audio>
                                     </section>
                                 ),
                             },
                         ]}
                     />
-                </main>
+                </div>
             </Container>
         </BgImage>
     );

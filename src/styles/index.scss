@@ -22,77 +22,53 @@ $baseWidth: 100%;
     flex-wrap: wrap;
 }
 
-.c-cardio-player {
+.c-chrono-player {
     width: 300px;
     height: 300px;
 
-    .less::before {
-        opacity: 1;
-        height: 1.5px;
-        width: 15px;
-        position: absolute;
-        top: 25px;
-        left: 17px;
-        display: block;
-        content: '';
-        border-radius: 50px;
-        background-color: #fff;
+    > .box-circle {
+        width: 250px;
+        height: 250px;
+        transform-origin: center; /* or transform-origin: 50% */
+        transform-box: fill-box;
     }
 
-    .more::before {
-        height: 1.5px;
-        width: 15px;
-        position: absolute;
-        top: 25px;
-        left: 17px;
-        display: block;
-        content: '';
-        border-radius: 50px;
-        background-color: #fff;
+    > .box-circle.is-played {
+        transform: scale(0.5);
     }
 
-    .more::after {
-        height: 15px;
-        width: 1.5px;
-        position: absolute;
-        top: 18px;
-        left: 24px;
-        display: block;
-        content: '';
-        border-radius: 50px;
-        background-color: #fff;
+    > .box-circle.is-animated0 {
+        animation: 4s zoomCircle1 linear;
+    }
+    > .box-circle.is-animated1 {
+        animation: 7s linear;
+        transform: scale(1);
+    }
+    > .box-circle.is-animated2 {
+        animation: zoomCircle3 8s linear;
+    }
+
+    > .circle-overlay {
+        width: 251px;
+        height: 251px;
+        background-color: rgba(255, 255, 255, 0.2);
     }
 }
 
-.c-cardio-player > svg {
-    &.is-animated-1 {
-        animation: 5s linear 0s zoomHeart1 forwards;
-    }
-    &.is-animated-2 {
-        animation: 5s linear 0s zoomHeart2 forwards;
-    }
-}
-
-@keyframes zoomHeart1 {
+@keyframes zoomCircle1 {
     0% {
-        transform: scale(0.6);
-        stroke-dashoffset: 0px;
+        transform: scale(0.5);
     }
-
     100% {
         transform: scale(1);
-        stroke-dashoffset: 0px;
     }
 }
 
-@keyframes zoomHeart2 {
+@keyframes zoomCircle3 {
     0% {
         transform: scale(1);
-        stroke-dashoffset: 0px;
     }
-
     100% {
-        transform: scale(0.6);
-        stroke-dashoffset: 0px;
+        transform: scale(0.5);
     }
 }
