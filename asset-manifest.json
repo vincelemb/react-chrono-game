@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/react-chrono-game/static/css/main.3dee4a07.chunk.css",
+    "main.js": "/react-chrono-game/static/js/main.088d2cbc.chunk.js",
+    "main.js.map": "/react-chrono-game/static/js/main.088d2cbc.chunk.js.map",
+    "runtime-main.js": "/react-chrono-game/static/js/runtime-main.e6adedfc.js",
+    "runtime-main.js.map": "/react-chrono-game/static/js/runtime-main.e6adedfc.js.map",
+    "static/js/2.c1b7d03d.chunk.js": "/react-chrono-game/static/js/2.c1b7d03d.chunk.js",
+    "static/js/2.c1b7d03d.chunk.js.map": "/react-chrono-game/static/js/2.c1b7d03d.chunk.js.map",
+    "index.html": "/react-chrono-game/index.html",
+    "static/css/main.3dee4a07.chunk.css.map": "/react-chrono-game/static/css/main.3dee4a07.chunk.css.map",
+    "static/js/2.c1b7d03d.chunk.js.LICENSE.txt": "/react-chrono-game/static/js/2.c1b7d03d.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.e6adedfc.js",
+    "static/js/2.c1b7d03d.chunk.js",
+    "static/css/main.3dee4a07.chunk.css",
+    "static/js/main.088d2cbc.chunk.js"
+  ]
+}
