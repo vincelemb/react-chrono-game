@@ -1,6 +1,6 @@
 {
-  "homepage": "https://vincelemb.github.io/react-memory-game",
-  "name": "outil-memory",
+  "homepage": "https://vincelemb.github.io/react-chrono-game",
+  "name": "outil-chrono",
   "version": "0.1.0",
   "private": true,
   "engines": {
